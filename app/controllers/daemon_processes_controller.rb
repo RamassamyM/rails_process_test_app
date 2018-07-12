@@ -32,21 +32,14 @@ class DaemonProcessesController < ApplicationController
     filepath = File.expand_path('app/lib/action.rb')
     # reader, writer, pid = PTY.spawn("ruby '#{filepath}'")
     child_pid = fork do
-      Signal.trap("SIGTERM") { puts "Ouch!"; exit }
-      puts "Child pid: #{Process.pid}, pgid: #{Process.getpgrp}"
-      Process.setsid
-      puts "Child new pgid: #{Process.getpgrp}"
-      puts "Child: long operation..."
-      system "sleep 20"
+      new_process
     end
-    sleep 2
-    pgid = Process.getpgid(child_pid)
-    puts "Child process pgid : #{pgid}"
-    @daemon_process = DaemonProcess.new(pid: pgid, name: "process_#{Time.now.to_i.to_s}")
+    puts "Child process pid : #{child_pid}"
+    @daemon_process = DaemonProcess.new(pid: child_pid, name: "process_#{Time.now.to_i.to_s}")
 
     respond_to do |format|
       if @daemon_process.save
-        format.html { redirect_to @daemon_process, notice: "Daemon process was successfully started : #{pgid}" }
+        format.html { redirect_to @daemon_process, notice: "Daemon process was successfully started : #{child_pid}" }
         format.json { render :show, status: :created, location: @daemon_process }
       else
         format.html { render :index }
@@ -54,6 +47,35 @@ class DaemonProcessesController < ApplicationController
       end
     end
   end
+
+  def new_process
+    Process.setsid
+    child_pid = fork do
+      puts "will never be seen"
+      Dir.chdir "/"
+      STDIN.reopen "/dev/null"
+      STDOUT.reopen "/dev/null", "a"
+      STDERR.reopen "/dev/null", "a"
+      system "sleep 20"
+      puts "finished process"
+      exit
+    end
+    sleep 1
+    exit if child_pid
+  end
+
+  # def new_process
+  #   Signal.trap("SIGTERM") { puts "Ouch!"; exit }
+  #   puts "Child pid: #{Process.pid}, pgid: #{Process.getpgrp}"
+  #   Process.detach(Process.pid)
+  #   Process.setsid
+  #   pgid = Process.getpgrp
+  #   puts "Child new pgid: #{pgid}"
+  #   puts "Child: long operation..."
+  #   system "sleep 20"
+  #   puts "process with pid #{Process.pid} has finished"
+  #   exit
+  # end
 
   # PATCH/PUT /daemon_processes/1
   # PATCH/PUT /daemon_processes/1.json
@@ -76,7 +98,6 @@ class DaemonProcessesController < ApplicationController
     begin
       puts "Sending SIGTERM to group #{pgid}..."
       Process.kill('SIGTERM', -pgid)
-      Process.detach(pgid)
       puts "Process killed..."
     rescue Exception => error
       puts "Error : #{error}"

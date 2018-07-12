@@ -16,6 +16,7 @@
       <tr>
         <td><%= daemon_process.pid %></td>
         <td><%= daemon_process.name %></td>
+        <td>Running state: <%= daemon_process.is_running? %> --- </td>
         <td><%= link_to 'Show', daemon_process %></td>
         <td><%= link_to 'Edit', edit_daemon_process_path(daemon_process) %></td>
         <td><%= link_to 'Destroy', daemon_process, method: :delete, data: { confirm: 'Are you sure?' } %></td>
