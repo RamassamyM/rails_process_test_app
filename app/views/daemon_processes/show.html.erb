@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Pid:</strong>
+  <%= @daemon_process.pid %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @daemon_process.name %>
+</p>
+
+<%= link_to 'Edit', edit_daemon_process_path(@daemon_process) %> |
+<%= link_to 'Back', daemon_processes_path %>

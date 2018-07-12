@@ -1,0 +1,31 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Daemon Processes</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pid</th>
+      <th>Name</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @daemon_processes.each do |daemon_process| %>
+      <tr>
+        <td><%= daemon_process.pid %></td>
+        <td><%= daemon_process.name %></td>
+        <td><%= link_to 'Show', daemon_process %></td>
+        <td><%= link_to 'Edit', edit_daemon_process_path(daemon_process) %></td>
+        <td><%= link_to 'Destroy', daemon_process, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Daemon Process', new_daemon_process_path %>
+
+<%= link_to 'Start', daemon_processes_path(@daemon_process), class: 'btn btn-primary', method: :post %>

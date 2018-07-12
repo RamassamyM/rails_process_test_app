@@ -1,0 +1,2 @@
+class DaemonProcess < ApplicationRecord
+end
